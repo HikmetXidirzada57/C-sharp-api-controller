@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,43 +27,68 @@ namespace DataAccess.Concrete.EntityFramework
             {
                 Description = x.Description,
                 Name = x.Name,
-                LanguageId = x.LanguageId,
+                LanguageKey=x.LanguageKey              
             }));
             using T110Context context= new();
             context.Add(product);
             context.SaveChanges();
         }
 
-        public List<Product> GetAllWithInclude()
+        public List<Product> GetAllWithInclude(Expression<Func<Product, bool>> filters, string lang)
         {
+
             using T110Context context = new();
-           return context.Products.Where(x=>!x.IsDeleted).Include(x=>x.ProductRecords).Include(x=>x.Category).ThenInclude(x=>x.CategoryRecords).ToList();
-             
+
+             var products = context.Products.Where(x=>!x.IsDeleted).Where(x=>!x.IsDeleted).
+                Include(x=>x.ProductRecords.Where(x => x.LanguageKey == lang)).
+                Include(x=>x.Category).
+                ThenInclude(x=>x.CategoryRecords).AsQueryable();
+            if(filters != null)
+            {
+                products = products.Where(filters);
+            }
+            return products.ToList();
         }
 
-        //public List<Product> GetAllWithLang()
-        //{
-        //    using T110Context context = new();
-        //    return context.Products.Where(x => !x.IsDeleted).Include(x => x.ProductRecords).Include(x => x.Category).ThenInclude(x => x.CategoryRecords).ToList();
-        //}
+        public Product GetByIdWithInclude(Expression<Func<Product, bool>>? filters, string lang)
+        {
+            using T110Context context = new();
+            var product = context.Products.
+              Where(x => !x.IsDeleted).
+              Include(x => x.ProductRecords.Where(x=>x.LanguageKey==lang)).
+              Include(x => x.Category).
+              ThenInclude(x => x.CategoryRecords).
+              FirstOrDefault(filters);
 
-        public List<Product> SearchProducts(int? categoryId, decimal? minPrice, decimal? maxPrice)
+           
+            return product;
+
+        }
+
+        public List<Product> SearchProducts( string? searchTerm,string? langKey)
         {
             using T110Context context = new();
             var products = context.Products.AsQueryable();
-
-            if (categoryId.HasValue)
+            if (!string.IsNullOrEmpty(searchTerm))
             {
-                products = products.Where(c => c.CategoryId == categoryId);
+                products = products
+                    .Include(p=>p.ProductRecords).
+                    Where(p => p.ProductRecords.
+                    Any(pr => pr.Name.ToUpper().Contains(searchTerm.ToUpper()) && pr.LanguageKey == langKey));
             }
-            if (minPrice.HasValue && maxPrice.HasValue)
-            {
 
-                products = products.Where(c => (c.Discount != null && c.Discount > 0) ?
-                (c.Discount >= minPrice && c.Discount <= maxPrice) :
-                (c.Price >= minPrice && c.Price <= maxPrice)
-                );
-            }
+            //if (categoryId.HasValue)
+            //{
+            //    products = products.Where(c => c.CategoryId == categoryId);
+            //}
+            //if (minPrice.HasValue && maxPrice.HasValue)
+            //{
+
+            //    products = products.Where(c => (c.Discount != null && c.Discount > 0) ?
+            //    (c.Discount >= minPrice && c.Discount <= maxPrice) :
+            //    (c.Price >= minPrice && c.Price <= maxPrice)
+            //    );
+            //}
             return products.ToList();
 
         }

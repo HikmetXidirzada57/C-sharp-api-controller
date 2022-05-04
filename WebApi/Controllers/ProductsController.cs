@@ -19,18 +19,31 @@ namespace WebApi.Controllers
         }
 
         // GET: api/<ProductsController>
-        [HttpGet]
-        public IEnumerable<Product> Get()
+        //[HttpGet("{lang}")]
+        //public IEnumerable<Product> Get(string? lang)
+        //{
+        //    return  _productService.GetProducts(lang);
+        //}
+        // GET: api/<ProductsController>
+        [HttpGet("{lang}/{searchTerm}")]
+        public  JsonResult Get(string? lang,string? searchTerm)
         {
-            return _productService.GetProducts();
-        }
+            var result = new JsonResult(new { });
 
-        // GET api/<ProductsController>/5
-        [HttpGet("{id}")]
-        public Product Get(int? id)
-        {
-            return _productService.GetById(id);
+            if (string.IsNullOrEmpty(lang)) return result ; 
+            result.Value = new
+            {
+                succes = true,
+                products = _productService.SearchProducts(searchTerm: searchTerm, langKey: lang)
+        };
+            return result;
         }
+        // GET api/<ProductsController>/5
+        //[HttpGet("{id}/{lang}")]
+        //public Product Get(int? id,string lang)
+        //{
+        //    return _productService.GetById(id,lang);
+        //}
 
         // POST api/<ProductsController>
         [HttpPost]

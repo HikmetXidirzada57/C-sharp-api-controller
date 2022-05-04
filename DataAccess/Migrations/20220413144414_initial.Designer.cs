@@ -4,6 +4,7 @@ using DataAccess.Concrete.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(T110Context))]
-    partial class T110ContextModelSnapshot : ModelSnapshot
+    [Migration("20220413144414_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,6 +132,9 @@ namespace DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("LanguageId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LanguageKey")
                         .HasColumnType("nvarchar(max)");
 
@@ -141,6 +146,8 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LanguageId");
 
                     b.HasIndex("ProductId");
 
@@ -169,6 +176,10 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Entities.Concrete.ProductRecord", b =>
                 {
+                    b.HasOne("Entities.Concrete.Language", null)
+                        .WithMany("ProductRecords")
+                        .HasForeignKey("LanguageId");
+
                     b.HasOne("Entities.Concrete.Product", null)
                         .WithMany("ProductRecords")
                         .HasForeignKey("ProductId")
@@ -179,6 +190,11 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Entities.Concrete.Category", b =>
                 {
                     b.Navigation("CategoryRecords");
+                });
+
+            modelBuilder.Entity("Entities.Concrete.Language", b =>
+                {
+                    b.Navigation("ProductRecords");
                 });
 
             modelBuilder.Entity("Entities.Concrete.Product", b =>

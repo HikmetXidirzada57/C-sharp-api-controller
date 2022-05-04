@@ -10,7 +10,5 @@ namespace Entities.Concrete
     {
         public int Id { get; set; }
         public string  LangCode { get; set; }
-        public virtual List<ProductRecord> ProductRecords { get; set; }
-
     }
 }

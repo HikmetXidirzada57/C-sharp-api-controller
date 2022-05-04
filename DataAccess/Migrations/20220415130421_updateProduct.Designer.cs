@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(T110Context))]
-    [Migration("20220409175051_initial")]
-    partial class initial
+    [Migration("20220415130421_updateProduct")]
+    partial class updateProduct
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -60,7 +60,7 @@ namespace DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LanguageId")
+                    b.Property<int>("LanguageKey")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -132,8 +132,11 @@ namespace DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LanguageId")
+                    b.Property<int?>("LanguageId")
                         .HasColumnType("int");
+
+                    b.Property<string>("LanguageKey")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -173,19 +176,15 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Entities.Concrete.ProductRecord", b =>
                 {
-                    b.HasOne("Entities.Concrete.Language", "Language")
+                    b.HasOne("Entities.Concrete.Language", null)
                         .WithMany("ProductRecords")
-                        .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("LanguageId");
 
                     b.HasOne("Entities.Concrete.Product", null)
                         .WithMany("ProductRecords")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Language");
                 });
 
             modelBuilder.Entity("Entities.Concrete.Category", b =>

@@ -24,17 +24,20 @@ namespace Business.Concrete
         //    return _dal.SearchProducts(categoryId,minPrice,maxPrice);
         //}
         
-        public List<Product> GetProducts()
+        public List<Product> GetProducts(string lang)
         {
-            return _dal.GetAllWithInclude();
+            return _dal.GetAllWithInclude(c=>!c.IsDeleted,lang);
         }
-        public Product? GetById(int? id)
+        public Product? GetById(int? id,string? lang)
         {
             if (id == null) return null;
-           return _dal.Get(c=>c.Id == id);
+           return _dal.GetByIdWithInclude(c=>c.Id ==id,lang);
            
         }
-
+        public List<Product> SearchProducts(string? searchTerm,string langKey="")
+        {
+            return _dal.SearchProducts(searchTerm, langKey);
+        }
         public void Add(ProductDTO product)
         {
             _dal.AddProductWithLang(product); 
@@ -57,5 +60,6 @@ namespace Business.Concrete
             _dal.Update(product);
         }
 
+      
     }
 }
